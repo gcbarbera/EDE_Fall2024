@@ -22,22 +22,23 @@ Enter answers to the questions just below the >Answer: prompt.
 
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: The experince I have with R and Git is limited. This is brand new to me. I have experience collecting, using, and analyzing data on a statistical level using excel but not with any other software
+> Answer: My experience with R and Git is limited. This software is brand new to me. I have experience collecting, using, and analyzing data on a statistical level using Excel but not with any other software. With data analytics, I have used Excel to understand and tidy multiple variables, but I haven't worked with the different data structures covered in class- such as lists and matrices. 
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I feel confident in my ability to follow directions. I appreciate having the videos to review, pause, and rewatch in one sitting. I am someone who likes to double-check my work while I am doing it, and I am confident in my ability to follow the instructions found online. I am also confident in my ability to ask questions and request help in class and on Slack if needed.
 
 3. Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: I am apprehensive about completely understanding what I am doing. I can follow the directions online, but I am apprehensive about my ability to fully comprehend what applying the files, pushing, pulling, etc. means in the context of R and the data. I am worried about carrying out the project and keeping up with it, but losing the true meaning of the data and what it represents in the process.
+This is my first time using computer software for data projects and I am nervous about saving my work, losing projects, and potentially getting sucked down a rabbit hole with the data. 
 
 
 ## 2) GitHub
 
 Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository and that you have updated your course README file, committed those changes, and pushed them to your GitHub account. 
 
-> Answer: 
+> Answer: https://github.com/gcbarbera/EDE_Fall2024 
 
 ## 3) Knitting
 When you have completed this document, click the `knit` button.This should produce a PDF copy of your markdown document. Submit this PDF to Canvas 
