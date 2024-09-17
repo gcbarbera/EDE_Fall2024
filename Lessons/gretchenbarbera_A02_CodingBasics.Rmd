@@ -1,0 +1,177 @@
+---
+title: "Assignment 2: Coding Basics"
+author: "Gretchen Barbera"
+output: pdf_document
+geometry: margin= 1.5 cm
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include=FALSE} 
+
+install.packages('formatR') 
+
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=50), tidy=TRUE) 
+#received this code from TA to enable all the words to show up
+#after knitting my document 
+
+```
+## OVERVIEW
+
+This exercise accompanies the lessons/labs in Environmental Data Analytics on coding basics.
+
+## Directions
+
+1.  Rename this file `<FirstLast>_A02_CodingBasics.Rmd` (replacing `<FirstLast>` with your first and last name).
+2.  Change "Student Name" on line 3 (above) with your name.
+3.  Work through the steps, **creating code and output** that fulfill each instruction.
+4.  Be sure to **answer the questions** in this assignment document.
+5.  When you have completed the assignment, **Knit** the text and code into a single PDF file.
+6.  After Knitting, submit the completed exercise (PDF file) to Canvas.
+
+## Basics, Part 1
+
+1.  Generate a sequence of numbers from one to 55, increasing by fives. Assign this sequence a name.
+
+2.  Compute the mean and median of this sequence.
+
+3.  Ask R to determine whether the mean is greater than the median.
+
+4.  Insert comments in your code to describe what you are doing.
+
+```{r basics 1}
+#1
+I_love_math <- seq(1,55,5) #I named my sequence I_love_math and 
+#it is showing up
+ #in my environment as the sequence of numbers. 
+#I can see my values in the environment but not when I run the code 
+seq(1,55,5)
+#2
+ mean(I_love_math) #this calculates the mean of my sequence that I named I_love_math 
+median(I_love_math) #this calculates the median of my sequence 
+ 
+#3
+mean(I_love_math) > median(I_love_math) #to see if the mean is greater 
+#than the median, I used the greater than symbol to determine 
+#if R would give me a true or false value. 
+#That True or False value will determine if the mean 
+#is greater than the median
+
+```
+
+## Basics, Part 2
+
+5.  Create three vectors, each with four components, consisting of (a) student names, (b) test scores, and (c) whether they are on scholarship or not (TRUE or FALSE).
+
+6.  Label each vector with a comment on what type of vector it is.
+
+7.  Combine each of the vectors into a data frame. Assign the data frame an informative name.
+
+8.  Label the columns of your data frame with informative titles.
+
+```{r basics 2}
+a <- c("PJ", "Teddy", "Poppy", "Simon")
+student_names <- c("PJ", "Teddy", "Poppy", "Simon") 
+#I am creating the vector student_names for the names of
+#the four students that I want to talk about. 
+#Having the c in front of the list tells me this is a vector
+# vector is characters  
+
+b <-c(100,45,78,86)
+test_scores <- c(100,45,78,86) #test scores vector- numbers
+
+c <- c(TRUE,TRUE, FALSE, TRUE)
+scholarships <- c(TRUE,TRUE, FALSE, TRUE) 
+#scholarships vector-logic
+
+#7 
+
+student_achievers <- data.frame(student_names,test_scores,scholarships)
+print(student_achievers) 
+#I have combined the vectors into my data frame with the data.frame 
+#command and renamed it student_achievers
+
+#8
+names(student_achievers) <- c("Student Name","test Score", "On Scholarship")
+print(student_achievers)
+#renamed the columns accordingly 
+#Student names are the names of my family pets. 
+#PJ is my cat, so he got a 100
+
+```
+
+9.  QUESTION: How is this data frame different from a matrix?
+
+> Answer: 
+This data frame has three different variables of data, 
+numeric, character, and logic while a matrix 
+needs to have all the same type of variables 
+(all numeric, all characters, all logic- there can’t be a mix). 
+
+10. Create a function with one input. In this function, use `if`...`else` to evaluate the value of the input: if it is greater than 50, print the word "Pass"; otherwise print the word "Fail". 
+
+11. Create a second function that does the exact same thing as the previous one but uses `ifelse()` instead if `if`...`else `. 
+
+12. Run both functions using the value 52.5 as the input
+
+13. Run both functions using the **vector** of student test scores you created as the input. (Only one will work properly...)
+
+```{r basics 3}
+#10. Create a function using if...else
+check_pass_fail <- function(score)
+{if (score > 50) {print("Pass")} else {print("Fail")}  }
+
+print(check_pass_fail(25)) #practice 
+
+#11. Create a function using ifelse()
+check_pass_fail_ifelse <- function(score) {
+result <- ifelse(score>50, "Pass", "Fail") }
+
+print(check_pass_fail_ifelse(25)) #practice attempt
+
+print(check_pass_fail_ifelse(52.5)) #practice attempt
+
+#12a. Run the first function with the value 52.5
+check_pass_fail(52.5)
+
+#12b. Run the second function with the value 52.5
+
+print(check_pass_fail_ifelse(52.5))
+
+#13a. Run the first function with the vector of test scores 
+
+results <- sapply(test_scores,check_pass_fail)
+
+#I used chatGPT to figure out how to apply the check_pass_fail 
+#for all the different test score vectors- 
+# it originally did not work but then I used chatGPT and class videos to
+#understand what the difference between the two was and how to
+#get the function to work 
+#(ChatGPT, Personal Communication, September 16, 2024)
+
+#13b. Run the second function with the vector of test scores
+#here I had to rename my results so I could get the results 
+#through the ifelse function
+
+restults <- ifelse(test_scores > 50, "Pass", "Fail") 
+results_ifelse <- ifelse(test_scores > 50, "Pass","Fail")
+print(results_ifelse) #enter this code to see the answers
+```
+
+14. QUESTION: Which option of `if`...`else` vs. `ifelse` worked? Why? (Hint: search the web for "R vectorization")
+
+> Answer:
+They both worked but after some googling.
+I needed to use the sapply button to get there for the if.. else function. 
+The if... else is not vectorized, which means that it 
+can't do multiple vectors at once 
+(i.e the logic vector, pass, and the data vector, the test score given ).
+I needed to use the sapply for the if.. else to my results 
+because of the multiple vectors the code had to 
+apply to each of the different elements in the function. The if... else
+function is also designed for handling scalar data- not the multiple 
+The ifelse worked more effiently for me because 
+it was able to asses the different vectors at once 
+while if... else could not handle the full vector on its own. (ChatGPT, Personal Communication, Septerber 16, 2024)
+
+
+**NOTE** Before knitting, you'll need to comment out the call to the function in Q13 that does not work. (A document can't knit if the code it contains causes an error!)
