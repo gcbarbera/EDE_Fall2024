@@ -174,8 +174,21 @@ EPAair_PM25_NC2019_raw_selected_data$AQS_PARAMETER_DESC <- "PM2.5"
 
 #6
 
+write.csv(EPAair_PM25_NC2019_raw_selected_data,
+          file = "./Data/Processed/EPAair_PM25_NC2019_processed.csv",
+          row.names = FALSE)
 
+write.csv(EPAair_PM25_NC2018_raw_selected_data,
+          file="./Data/Processed/EPAair_PM25_NC2018_processed.csv",
+          row.names = FALSE)
 
+write.csv(EPAair_O3_NC2018_raw_Selected_Data,
+          file = "./Data/Processed/EPAair_O3_NC2018_processed.csv",
+          row.names = FALSE)
+
+write.csv(EPAair_O3_NC2019_raw_Selected_Data,
+          file = "./Data/Processed/EPAair_O3NC2019_processed.csv",
+          row.names = FALSE)
 ```
 
 
@@ -209,17 +222,88 @@ EPAair_PM25_NC2019_raw_selected_data$AQS_PARAMETER_DESC <- "PM2.5"
 ```{r questions 7 thru 11}
 #7 
 
+EPAair_O3_NC2018_Processed <- 
+  read.csv("./Data/Processed/EPAair_O3_NC2018_processed.csv")
+
+#re uploading my new processed data 
+
+EPAair_O3NC2019_Processed <- read.csv("./Data/Processed/EPAair_O3NC2019_processed.csv")
+
+EPAair_PM25_NC2018_Processed <- read.csv("./Data/Processed/EPAair_PM25_NC2018_processed.csv")
+
+EPAair_PM25_NC2019_Processed <- read.csv("./Data/Processed/EPAair_PM25_NC2019_processed.csv")
+
+#colnames(EPAair_O3_NC2018_Processed)
+#colnames(EPAair_O3NC2019_Processed)
+#colnames(EPAair_PM25_NC2018_Processed)
+#colnames(EPAair_PM25_NC2019_Processed)
+#making sure they have identical names 
+#they do! score 
+
+combined_data <- rbind(EPAair_O3_NC2018_Processed,
+                       EPAair_O3NC2019_Processed, EPAair_PM25_NC2018_Processed, 
+                       EPAair_PM25_NC2019_Processed)
+#combining all the data 
+
+
+str(combined_data)
+dim(combined_data)
+#looking at the structure and dimensions to make sure that they are good 
 
 #8 
+
+common_sites_combined_data <- c("Linville Falls", "Durham Armory", "Leggett", "Hattie Avenue",  
+  "Clemmons Middle", "Mendenhall School", "Frying Pan Mountain",
+  "West Johnston Co.", "Garinger High School", "Castle Hayne", 
+  "Pitt Agri. Center", "Bryson City", "Millbrook School")
+
+#I created a vector with the common sites so it will be easier 
+
+filtered_data <- combined_data %>%
+  filter(Site.Name %in% common_sites_combined_data)
+
+
+combined_fitlered_data <- filtered_data %>%
+  group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>%
+  summarise(
+    DAILY_AQI_VALUE = mean(DAILY_AQI_VALUE, na.rm = TRUE),
+    SITE_LATITUDE = mean(SITE_LATITUDE, na.rm = TRUE),
+    SITE_LONGITUDE = mean(SITE_LONGITUDE, na.rm = TRUE)
+  )
+
+#getting the mean values of the different variables
+
+
+combined_fitlered_data <- combined_fitlered_data %>%
+mutate(
+  Month = month(Date),
+                Year = year(Date))
+#I added the month and year columns 
+#now I have the dimensions 14751 X 19
+
 
 
 #9
 
+combined_fitlered_data.spread <-
+  pivot_wider(combined_fitlered_data,
+names_from = AQS_PARAMETER_DESC,
+values_from = DAILY_AQI_VALUE,
+values_fill = list(DAILY_AQI_VALUE = NA))
+
+colnames(combined_fitlered_data.spread)
+
 
 #10
 
+dim(combined_fitlered_data.spread)
+
 
 #11
+
+write.csv (combined_fitlered_data.spread,
+          file = "./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv",
+                  row.names = FALSE)
 
 
 ```
@@ -235,14 +319,35 @@ EPAair_PM25_NC2019_raw_selected_data$AQS_PARAMETER_DESC <- "PM2.5"
 
 #12
 
+EPAair_O3_PM25_NC1819_Processed <- read.csv("./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv")
+
+#re up loading the dataset I just made and naming it based on how it was saved
+
+EPAair_O3_PM25_NC1819_Processed_Summary_Data <-
+  #my new data is called summay
+  EPAair_O3_PM25_NC1819_Processed %>%
+  #old data 
+  group_by(Site.Name, Month, Year) %>%
+  #grouping sites
+  summarise(
+    mean_Ozone_AQI = mean(Ozone, na.rm = TRUE),
+    #calculating for mean ozone 
+    mean_PM25_AQI = mean(PM2.5, na.rm = TRUE)
+  ) %>%
+  #calculating for mean PM2.5
+      na.omit(mean_Ozone_AQI)
+#using the drop_na function I drop the rows where the mean value of ozone is NA 
+
+#View(EPAair_O3_PM25_NC1819_Processed_Summary_Data)
 
 #13
 
-
+dim(EPAair_O3_PM25_NC1819_Processed_Summary_Data)
+#new dimensions are 239 X 5
 
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`? Hint: replace `drop_na` with `na.omit` in part 12 and observe what happens with the dimensions of the summary date frame.
 
 > Answer: 
-
+When I ran the na.omit, the dimensions changed from 239 X 5 to 223 X5. The na.omit removed all the rows that contained any NA and not just the the rows within the Mean_Ozone_AQI. The drop_na function let me just pick the specific column I wanted to omit the NAs from while the na.omit took out NA values from other columns.  
