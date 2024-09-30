@@ -47,7 +47,7 @@ file=here("./Data/Raw/EPAair_PM25_NC2019_raw.csv") ,
 stringsAsFactors= TRUE) 
 
 
-View(EPAair_PM25_NC2019_raw)
+#View(EPAair_PM25_NC2019_raw)
 
 
 EPAair_PM25_NC2018_raw <-  read.csv(
@@ -68,7 +68,7 @@ EPAair_O3_NC2019_raw <- read.csv(
   file=here("./Data/Raw/EPAair_O3_NC2019_raw.csv") ,
   stringsAsFactors = TRUE)
 
-View(EPAair_O3_NC2019_raw)
+#View(EPAair_O3_NC2019_raw)
 
 #2 
 dim(EPAair_PM25_NC2018_raw)
@@ -179,7 +179,8 @@ write.csv(EPAair_PM25_NC2019_raw_selected_data,
           row.names = FALSE)
 
 write.csv(EPAair_PM25_NC2018_raw_selected_data,
-          file="./Data/Processed/EPAair_PM25_NC2018_processed.csv",
+          file=
+            "./Data/Processed/EPAair_PM25_NC2018_processed.csv",
           row.names = FALSE)
 
 write.csv(EPAair_O3_NC2018_raw_Selected_Data,
@@ -350,4 +351,8 @@ dim(EPAair_O3_PM25_NC1819_Processed_Summary_Data)
 14. Why did we use the function `drop_na` rather than `na.omit`? Hint: replace `drop_na` with `na.omit` in part 12 and observe what happens with the dimensions of the summary date frame.
 
 > Answer: 
-When I ran the na.omit, the dimensions changed from 239 X 5 to 223 X5. The na.omit removed all the rows that contained any NA and not just the the rows within the Mean_Ozone_AQI. The drop_na function let me just pick the specific column I wanted to omit the NAs from while the na.omit took out NA values from other columns.  
+When I ran the na.omit, the dimensions changed from 239 X 5 to 223 X 5. The na.omit removed all the rows that contained any NA in any dataframe and not just the the rows within the Mean_Ozone_AQI. The drop_na function let me just pick the specific column I wanted to omit the NAs from while the na.omit took out NA values from other columns.  
+
+
+
+
