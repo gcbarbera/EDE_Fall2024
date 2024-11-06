@@ -1,10 +1,13 @@
 ---
-title: "Assignment 8: Time Series Analysis"
+title: 'Assignment 8: Time Series Analysis'
 author: "Gretchen Barbera"
 date: "Fall 2024"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 geometry: margin=2.54cm
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
@@ -56,18 +59,12 @@ library(trend)
 
 
 # If I want to import everything from my specific folder #I have to go to the path 
-folder_path <- "~/EDE_Fall2024/Data/Raw/Ozone_TimeSeries"
 
-# Then, list all CSV files in the folder
+folder_path <- "~/EDE_Fall2024/Data/Raw/Ozone_TimeSeries"
 file_list <- list.files(path = folder_path, pattern = "\\.csv$", full.names = TRUE)
 
-
-print(file_list)
-
-  
-  GaringerOzone1 <- file_list %>%
-    map_dfr(read_csv)
-
+GaringerOzone <- file_list %>%
+  map_dfr(read_csv)
 
 ```
 
@@ -84,10 +81,10 @@ print(file_list)
 ```{r}
 # 3
 
-GaringerOzone1$Date <- as.Date(GaringerOzone1$Date, format="%d/%m/%Y")  
- str(GaringerOzone1$Date)
+GaringerOzone$Date <- as.Date(GaringerOzone$Date, format="%d/%m/%Y")  
+ str(GaringerOzone$Date)
  
-class(GaringerOzone1$Date)
+class(GaringerOzone$Date)
 
 
 
@@ -96,10 +93,10 @@ class(GaringerOzone1$Date)
 
 library(dplyr)
 
-GaringerOzone1 <- GaringerOzone1 %>%
+GaringerOzone1 <- GaringerOzone %>%
   select(Date, `Daily Max 8-hour Ozone Concentration`, DAILY_AQI_VALUE)
 
-str(GaringerOzone1)
+str(GaringerOzone)
 
 # 5
 
@@ -118,6 +115,7 @@ colnames(Days)
 GaringerOzone <- left_join(Days,GaringerOzone,by = "Date")
 
 dim(GaringerOzone)
+
 
 
 
