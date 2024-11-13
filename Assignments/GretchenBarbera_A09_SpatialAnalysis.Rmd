@@ -36,6 +36,8 @@ library(dplyr);library(ggplot2)
 
 here()
 getwd()
+
+
 ```
 
 
@@ -50,28 +52,29 @@ In this exercise, we will be exploring stream gage height data in Nebraska corre
 ```{r Read the county data into an sf dataframe}
 #3. Read in Counties shapefile into an sf dataframe, filtering for just NE counties
 
-stream_gage_NE <- st_read(here(
+NE_gage_counties <- st_read(here(
   'Data/Spatial/cb_2018_us_county_20m.shp')) %>%
   filter(STATEFP == '31')
 
-
+head(NE_gage_counties)
 here()
 
 #4. Reveal the CRS of the counties features
 
-glimpse(stream_gage_NE)
-st_crs(stream_gage_NE)
+glimpse(NE_gage_counties)
+st_crs(NE_gage_counties)
 
-st_crs(stream_gage_NE)$epsg
+st_crs(NE_gage_counties)$epsg
 
 
 #5. Plot the data
 
-ggplot(data = stream_gage_NE) +
-  geom_sf(fill = "lightblue", color = "darkblue")
+ggplot(data = NE_gage_counties) +
+  geom_sf(fill = "lightblue", color = "darkblue")+
+  labs( title = "Nebraska Counties Map")
 
 
-mapview(stream_gage_NE)
+mapview(NE_gage_counties)
 
 
 
@@ -80,7 +83,7 @@ mapview(stream_gage_NE)
 6.    What is the EPSG code of the Counties dataset? Is this a geographic or a projected coordinate reference system? (Om other words, does this CRS use angular or planar coordinate units?) To what datum is this CRS associated? (Tip: look for the EPSG code on <https://epsg.io>)
 
 > ANSWER: 
-> The EPSG is 4269. Uses latitude and longitude
+> The EPSG is 4269. This is a geographic coordinate referense system because it uses degress of lattitude and longitude to describe the gage locations. The CRS uses angular units. According to the site above, the datum is the North American Datum 1983.
 
 
 ### Read in gage locations csv as a dataframe, then display the column names it contains
@@ -97,6 +100,7 @@ Next we'll read in some USGS/NWIS gage location data added to the `Data/Raw` fol
 gage_locations <- read.csv(here('./Data/Raw/NWIS_SiteInfo_NE_RAW.csv'),
                           stringsAsFactors = TRUE)
 
+head(gage_locations)
 
 
 #8. Display the structure of the dataframe
@@ -125,17 +129,20 @@ gage_locations_sf <- gage_locations %>%
   st_as_sf(coords = c("dec_long_va", "dec_lat_va"),
            crs=4269)
 
+
+
 #11. Display the structure
 
 
 str(gage_locations_sf)
-
+st_crs(gage_locations_sf)
+#when I do this i want to make sure i get the same information that i got when looking on the website above to make sure that I am using the correct points 
 ```
 
 12.   What new field(s) appear in the sf dataframe created? What field(s), if any, disappeared?
 
 >ANSWER: 
->The sf data object gained the geometry field. The lat and long columns are not longer in the sf dataset. 
+>The sf data object gained the geometry field which stores the spatial information for the gages. The lat and long columns are not longer in the sf dataset. This is now a spatial dataframe that can be used for spatial analysis and visualizations- I can make maps with the gages now. 
 
 
 ### Plot the gage locations on top of the counties
@@ -150,7 +157,7 @@ str(gage_locations_sf)
 
 
 ggplot()+
-  geom_sf(data = stream_gage_NE,
+  geom_sf(data = NE_gage_counties,
           fill= "lightblue", color = "darkblue")+
   geom_sf(data = gage_locations_sf, color = "orange")+
   labs(
@@ -158,7 +165,7 @@ ggplot()+
     subtitle = "Gretchen Barbera")
 
 #when I originally ran the plot it said I can't transform the object with the missing crs values so I had to go back up to when I was making the gage_locations_sf to add the CRS values 
-#the lat and long on the plot looks awesome 
+
 ```
 
 
@@ -178,29 +185,48 @@ Lastly, we want to attach some gage height data to our site locations. I've cons
 ```{r Read in gage site data}
 #14. Read the site flow data into a data frame
 
-site_flow_data <- read.csv(here("Data/Raw/NWIS_SiteFlowData_NE_RAW.csv"),
-                           stringsAsFactors = TRUE)
+site_flow_data <- read.csv(here("Data/Raw/NWIS_SiteFlowData_NE_RAW.csv"))
+
+head(site_flow_data)
+
+str(site_flow_data)
+
+
+site_flow_data$site_no <- as.factor(site_flow_data$site_no)
+#site flow data should be read as factors. I originally has stringsAsFactors = true but then it changed some of the columns that I didn't want to read as factors so I went back to convert
+
+
+# Check the structure again
+str(site_flow_data)
+
 
 #15. Show the column names
 
 colnames(site_flow_data)
 colnames(gage_locations_sf)
 
-#before joining- I have to make sure they have the same site_no
+#before joining- I have to make sure they have the same site_no column
 
 #16. Join the flow data to our NWIS gage location spatial dataframe
 
-gage_locations_with_flow <- gage_locations_sf %>%
+
+#ran into an error where the site_no were not the same- one was an integer and one was a factor 
+
+site_flow_data$site_no <- as.integer(as.character(site_flow_data$site_no))
+
+gage_data_joined <- gage_locations_sf %>%
   left_join(site_flow_data, by = 'site_no')
 
+#now site_no is an integer for both
+#we joined the gage locations and the gage_ht information
 
 #17. Show the column names in the resulting spatial dataframe
 
-colnames(gage_locations_with_flow)
+colnames(gage_data_joined)
 
 #18. Show the dimensions of this joined dataset
 
-dim(gage_locations_with_flow)
+dim(gage_data_joined)
 
 ```
 
@@ -211,13 +237,28 @@ Now we can examine where the flooding appears most acute by visualizing gage hei
     *   Show the magnitude of gage height by color, shape, other visualization technique.
 
 ```{r map gage sites}
-#Map the points, sized by gage height
+#19 Map the points, sized by gage height
 
 ggplot() +
-  geom_sf(data = stream_gage_NE, fill ="lavender", color = "darkblue") +
-  geom_sf(data = gage_locations_with_flow, aes(color = gage_ht))
-          
+  geom_sf(data = NE_gage_counties, fill ="lavender", color = "darkblue") +
+  geom_sf(data = gage_data_joined, aes(color = gage_ht, size = gage_ht)) +
+  labs (
+    title = "Flood Gage Heights in Nebraska"
+  )
+       
+mapview(NE_gage_counties) + 
+  mapview(gage_data_joined, 
+          zcol = "gage_ht",
+          cex = "gage_ht",
+          color = "yellow", 
+          popup = TRUE, 
+          shape = "circle",
+          layer.name = "Gage Heights")
+
+colnames(gage_data_joined)
  
+#I originally liked the ggplot better but I think the mapview looks best for this 
+#adjusted the size of the points based on the gage_ht 
 ```
 
 ---
@@ -235,11 +276,43 @@ Up next we will do some spatial analysis with our data. To prepare for this, we 
 ```{r spatial analysis}
 #20 Transform the counties and gage location datasets to UTM Zone 14
 
+gage_locations_sf_utm <- st_transform(gage_locations_sf, crs = 32614)
 
+NE_gage_counties_utm <- st_transform(NE_gage_counties, crs = 32614)
+
+#i originally did the whole lab using these UTM datasets and then I realized
+#I joined them together into one already and it allowed me to keep the gage_ht
+
+
+gage_data_joined_utm <- st_transform(gage_data_joined, crs = 32614)
+  
+
+str(gage_data_joined_utm)
+colnames(gage_data_joined_utm)
 
 #21 Plot the data
 
+mapview(gage_data_joined_utm,
+        zcol = "gage_ht",             
+        cex = "gage_ht",               
+        col.regions = c("red", "yellow", "blue")) 
 
+
+ggplot() +
+  geom_sf(data = NE_gage_counties_utm, fill = "lightblue", color = "black", size = 0.1) +  
+  geom_sf(data = gage_data_joined_utm, aes(color = gage_ht, size = gage_ht)) +           
+  scale_color_gradientn(colors = c("pink", "red"), name = "Gage Height") +     
+  scale_size_continuous(range = c(1, 5), name = "Gage Height") +                        
+  labs(
+    title = "Gage Heights Across Nebraska",
+    subtitle = "Symbolized by Gage Height (color and size)"
+  ) +
+  theme_minimal()
+
+     
+
+#I like the ggplot better for this one 
+#make the gages different colors 
 
 ```
 
@@ -260,14 +333,80 @@ Now let's zoom into a particular county and examine the gages located there.
 ```{r spatial selection}
 #22 Select the county
 
+lancaster_county <- NE_gage_counties_utm %>%
+  filter(NAME == "Lancaster")
+
+print(lancaster_county)
+mapview(lancaster_county)
 
 #23 Spatially select gages within the selected county
 
+gages_in_lancaster <- gage_data_joined_utm %>%
+  filter(st_within (geometry, lancaster_county$geometry, sparse = FALSE) [,1])
+
+colnames(gage_locations_sf_utm)
+
+#the st_within filters the gages to keep them in lancaster 
+#geometry uses the location of lancaster 
+#and then the the lancaster_county$geometry 
+#gets the location of the gage points within the county 
+
+print(gages_in_lancaster)
+
+mapview(gages_in_lancaster)
+
+
+#i mapped the county to see what it looked like- just a regular old rectangle 
 
 #24 Spatially select gages within 15 k of the selected county
+
+lancaster_buffer <- st_buffer(lancaster_county, dist= 15000) 
+
+print(lancaster_buffer)
+mapview(lancaster_buffer)
+
+lancaster_gages_within_15k <- gage_locations_sf_utm %>% filter(st_within(geometry, lancaster_buffer, sparse = FALSE))
+                                                  mapview(lancaster_gages_within_15k)
+
+print(lancaster_gages_within_15k)
+
 
 
 #25 Plot
 
+colnames(lancaster_gages_within_15k)
+
+
+#mapview(NE_gage_counties_utm, color = "green") + 
+  # mapview(gage_data_joined_utm, zcol="gage_ht",
+  #         cex= "gage_ht",
+  #         col.regions = c("red","blue")) + 
+ # mapview(lancaster_buffer, col.regions = "pink")+
+ # mapview(lancaster_gages_within_15k)
+
+
+
+# ggplot() +
+#   geom_sf(data = NE_gage_counties_utm, fill = "gray", color = "black") + 
+#   geom_sf(data = lancaster_county, fill = "lightblue", color = "blue") +                     
+#   geom_sf(data = lancaster_county, color = "red") +                        geom_sf(data = lancaster_gages_within_15k, color = "purple") +                                 labs(
+#     title = "Nebraska Counties, Selected County, and Gage Sites",
+#     subtitle = "Gage sites within the selected county and within 15 km of its border")
+
+
+
+colnames(lancaster_county)
+
+
+mapview(NE_gage_counties_utm, color = "black", layer.name = "All Nebraska Counties") +
+  mapview(lancaster_county, color = "blue", layer.name = "Lancaster County") +
+  mapview(lancaster_county, col.regions = "red", cex = 3,
+          layer.name = "Gages in Lancaster County") +
+  mapview(lancaster_gages_within_15k, color = "yellow", 
+          cex = 3, 
+          layer.name = "Gages within 15 km of Lancaster County")+
+  mapview(lancaster_buffer, color = "pink")
+
+#this one has a better view of the different pieces
 
 ```
